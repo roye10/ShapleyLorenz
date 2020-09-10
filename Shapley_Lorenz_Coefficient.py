@@ -40,7 +40,7 @@ class ShapleyLorenzShare():
     def ShapleyKernel(self, M, s):
         return factorial(s)*factorial(M-s-1)/factorial(M)
 
-    def ShapleyLorenz_val(self, X, y, M = None):
+    def ShapleyLorenz_val(self, X, y, M = None, row = None):
 
         '''
         Computes the Shapley Lorenz marginal contribution of
@@ -52,15 +52,22 @@ class ShapleyLorenzShare():
             nxp matrix containing the model covariates
         y : vector
             n-vector containing the values to predict
-        M : int (DEFAULT: M = X.shape[1])
+        M : int (DEFAULT: X.shape[1])
             number of covariates to calculate the Shapley Lorenz
             marginal contributions for
+        row : int (DEFAULT: None)
+            observation to explain
         '''
         if M == None:
             M = X.shape[1]
-        
+
         X = np.array(X)
         y = np.array(y)
+
+        if len(X.shape) == 1:
+            raise ValueError('Need to have an appropriate number of observations')
+        else:
+            n = X.shape[0]
 
         #LZ_temp = np.zeros((2**(M-1),1))
         LZ = np.zeros((M,1))
@@ -68,10 +75,10 @@ class ShapleyLorenzShare():
         # Loop over number of covariates
         for k in range(M):
             # Initialise
-            V_base = np.zeros((X.shape[0],M,2**(M-1)))
-            V_k = np.zeros((X.shape[0],M,2**(M-1)))
-            y_base = np.zeros((y.shape[0],2**(M-1)))
-            y_k = np.zeros((y.shape[0],2**(M-1)))
+            V_base = np.zeros((n,M,2**(M-1)))
+            V_k = np.zeros((n,M,2**(M-1)))
+            y_base = np.zeros((n,2**(M-1)))
+            y_k = np.zeros((n,2**(M-1)))
             kernel = np.zeros((2**(M-1),1))
 
             s_all = list(range(M))
@@ -85,49 +92,52 @@ class ShapleyLorenzShare():
                 s_k = k+s
 
                 # yHat including covariate k
-                V_k[:,s_k,i] = X[:,s_k]
+                if row != None:
+                    y_k[:,i] = self.model.fit(V_k[:,s_k,i],y)\
+                        .predict(V_k[row,s_k,i].reshape(1,-1))
+                else:
+                    V_k[:,s_k,i] = X[:,s_k]
                 y_k[:,i] = self.model.fit(V_k[:,s_k,i],y)\
-                    .predict(V_k[:,s_k,i]).reshape(len(y))
+                    .predict(V_k[:,s_k,i]).reshape(n)
                 y_k[:,i] = np.sort(y_k[:,i],0)
 
                 # yHat baseline, (w/o covariate k)
-                if len(s) == 0:
-                    for j in range(X.shape[1]):
-                        perm_indx = np.random.randint(0,X.shape[0],X.shape[0])
-                        V_base[:,j,0] = X[perm_indx,j]
-                        y_base[:,0] = self.model.fit(V_base[:,:,0],y)\
-                            .predict(V_base[:,:,0]).reshape(len(y))
-                        y_base[:,0] = np.sort(y_base[:,0],0)
-                else:
-                    V_base[:,s,i] = X[:,s]
-                    y_base[:,i] = self.model.fit(V_base[:,s,i],y)\
-                        .predict(V_base[:,s,i]).reshape(len(y))
-                    y_base[:,i] = np.sort(y_base[:,i],0)
+                if row != None:
+                    if len(s) == 0:
+                        for j in range(X.shape[1]):
+                            perm_indx = np.random.randint(0,n,n)
+                            V_base[:,j,0] = X[perm_indx,j]
+                            y_base[:,0] = self.model.fit(V_base[:,:,0],y)\
+                                .predict(V_base[row,:,0].reshape(1,-1))
+                    else:
+                        V_base[:,s,i] = X[:,s]
+                        y_base[:,i] = self.model.fit(V_base[:,s,i],y)\
+                            .predict(V_base[row,s,i].reshape(1,-1))
 
-                    # Compute Kernel
-                    kernel[i,0] = self.ShapleyKernel(M,len(s))
+                else:
+                    if len(s) == 0:
+                        for j in range(X.shape[1]):
+                            perm_indx = np.random.randint(0,n,n)
+                            V_base[:,j,0] = X[perm_indx,j]
+                            y_base[:,0] = self.model.fit(V_base[:,:,0],y)\
+                                .predict(V_base[:,:,0]).reshape(n)
+                            y_base[:,0] = np.sort(y_base[:,0],0)
+                    else:
+                        V_base[:,s,i] = X[:,s]
+                        y_base[:,i] = self.model.fit(V_base[:,s,i],y)\
+                            .predict(V_base[:,s,i]).reshape(n)
+                        y_base[:,i] = np.sort(y_base[:,i],0)
+
+                        # Compute Kernel
+                        kernel[i,0] = self.ShapleyKernel(M,len(s))
 
             # Compute Lorenz Zenoid values
-            Lor_val_temp = np.zeros((X.shape[0],2**(M-1)))
-            for j in range(len(y)):
+            Lor_val_temp = np.zeros((n,2**(M-1)))
+            for j in range(n):
                 Lor_val_temp[j,:] = j*(y_k[j,:]-y_base[j,:])
-            Lor_val = ((2/(len(y)**2))*np.mean(y))*(Lor_val_temp.sum(0))
-            Lor_val = Lor_val.reshape((1,2**(M-1))
+            Lor_val = ((2/(n**2))*np.mean(y))*(Lor_val_temp.sum(0))
+            Lor_val = Lor_val.reshape((1,2**(M-1)))
 
             LZ[k,0] = np.dot(Lor_val,kernel)
             
         return LZ
-
-
-# Tests
-
-# Simulation data
-#X = np.random.normal(0.5,4,(20,4))
-#beta = np.array([[0.5,0.8,3,0.1]])
-#y = 100 + np.dot(X,beta.T)+np.random.normal(0,1,(X.shape[0],1))
-
-# Linear Regressor method
-#lin_reg = LinearRegression()
-
-#LZ_contributionsII = ShapleyLorenzShare(lin_reg).ShapleyLorenz_val(X,y)
-#print(LZ_contributionsII)
