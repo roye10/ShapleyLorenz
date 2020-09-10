@@ -6,3 +6,4 @@ Algorithm that computes Shapley-Lorenz contribution coefficients, inspired by th
 
 TODO:
 - insert method for normalising features, so as to account for negative values
+- add possibility to use with classification problems
