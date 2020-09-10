@@ -58,6 +58,9 @@ class ShapleyLorenzShare():
         '''
         if M == None:
             M = X.shape[1]
+        
+        X = np.array(X)
+        y = np.array(y)
 
         #LZ_temp = np.zeros((2**(M-1),1))
         LZ = np.zeros((M,1))
@@ -109,7 +112,7 @@ class ShapleyLorenzShare():
             for j in range(len(y)):
                 Lor_val_temp[j,:] = j*(y_k[j,:]-y_base[j,:])
             Lor_val = ((2/(len(y)**2))*np.mean(y))*(Lor_val_temp.sum(0))
-            Lor_val = Lor_val.reshape((1,8))
+            Lor_val = Lor_val.reshape((1,2**(M-1))
 
             LZ[k,0] = np.dot(Lor_val,kernel)
             
