@@ -13,4 +13,4 @@ TODO:
 
 Plot of Lorenz Curves for simulation data set with three features and normally distributed features and error term:
 
-![](https://github.com/renzmann10/ShapleyLorenz/blob/master/Pictures/Lorenz%20Curve.png)
+![](Pictures/Lorenz_Curve.png)
