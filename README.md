@@ -14,3 +14,6 @@ TODO:
 Plot of Lorenz Curves for simulation data set with three features and normally distributed features and error term:
 
 ![](Pictures/Lorenz_Curve.png)
+
+How to read:
+The furter away the Lorenz curve from the 90 degree line, the more of the variation in the observed response variable, the model is able to explain.
