@@ -1,6 +1,6 @@
 '''
 Calculates the Shapley Lorenz marginal contribution, based on the paper:
-Shapley-Lorenz decompositions in eXplainable Artificial Intelleigence
+"Shapley-Lorenz decompositions in eXplainable Artificial Intelleigence"
 by Paolo Giudici* and Emanuela Raffinetti**
 *University of Pavia
 **Università degli Studi di Milano
@@ -25,14 +25,14 @@ class ShapleyLorenzShare():
         specifies the prediction model
 
     '''
-        def __init__(self, model):
+    def __init__(self, model):
         self.model = model
 
-# Combinatoric tool
+    # Combinatoric tool
     def powerset(self, iterable):
-            s = list(iterable)
-            return itertools.chain.from_iterable(itertools.combinations(s,r)\
-                for r in range(len(s)+1))
+        s = list(iterable)
+        return itertools.chain.from_iterable(itertools.combinations(s,r)\
+                                             for r in range(len(s)+1))
             # s : iterable
             # r : length
 
