@@ -1,4 +1,8 @@
 # Additional functions
+'''
+This code entails auxiliary functions used in main.py. These were taken from the ..common.py
+module from Scott Lundberg and Su-In Lee (E-Mails are noted in main.py).
+'''
 
 class Data:
     def __init__(self, data, col_names):
