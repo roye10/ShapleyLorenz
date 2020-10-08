@@ -3,6 +3,10 @@
 # Recently added
 - extension of Kernel SHAP as proposed by Lundberg and Lee in "A Unified Approach to Interpreting Model Predicions", whereby SHAP values are 'standardised' according to their contribution to model accuracy
 
+sample image for global SHAP values (M > 100)
+
+![Global SHAP values](Pictures/Accuracy_score)
+
 ### - IN PROGRESS - 
 
 Algorithm that computes Shapley-Lorenz contribution coefficients, inspired by the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
