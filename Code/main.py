@@ -1,3 +1,12 @@
+'''
+This code entails a variant of the SHAP values as proposed by Scott Lundberg* and Su-In Lee**.
+This module uses the Kernel SHAP method as proposed by the aforementioned authors and inspired by
+the idea from Paolo Giudici and Emanuela Raffinetti of computing Shapley-Lorenz values, to computing
+standardised SHAP values. The underlying module uses the built in python module to compute accuracy scores,
+in order to compute global feature importance values in units of accuracy score.
+'''
+
+
 import auxiliary_functions
 import numpy as np
 import pandas as pd
