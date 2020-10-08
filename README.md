@@ -1,5 +1,8 @@
 # ShapleyLorenz
 
+# Recently added
+- extension of Kernel SHAP as proposed by Lundberg and Lee in "A Unified Approach to Interpreting Model Predicions", whereby SHAP values are 'standardised' according to their contribution to model accuracy
+
 ### - IN PROGRESS - 
 
 Algorithm that computes Shapley-Lorenz contribution coefficients, inspired by the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
