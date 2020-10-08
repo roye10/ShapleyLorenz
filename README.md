@@ -5,7 +5,7 @@
 
 sample image for global SHAP values (M > 100)
 
-![Global SHAP values](Pictures/Accuracy_score)
+![Global SHAP values](Pictures/Accuracy_score.png)
 
 ### - IN PROGRESS - 
 
