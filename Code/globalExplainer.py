@@ -1,20 +1,3 @@
-'''
-This module extends the Kernel SHAP explainer as proposed by Scott Lundberg* and Su-In Lee**, in their paper
-"A Unified Approach to Interpreting Model Predictions". The here defined function extends the Kernel SHAP method from
-computing local feature importance to computing global feature importance values. Moreover, the global feature importance measures
-are 'standardised' in terms of the increase/decrease in accuracy they provide to the model. This latter point
-is inspired by the approach taken by Paolo Giudici+ and Emanueala Raffinetti++, in their paper
-"Shapley-Lorenz decompositions in exPlainable Artificial Intelligence", where they standardise
-Shapley values, by considering their Gini coefficient, i.e. how much variance of the true variance, can be
-attributed to each feature.
-
-*slund1@cs.washington.edu
-**suinlee@cs.washington.edu
-+paolo.giudici@unipv.it
-++emanuela.raffinetti@unimi.it
-'''
-
-import auxiliary_functions
 import numpy as np
 import pandas as pd
 import scipy as sp
@@ -24,6 +7,9 @@ from tqdm.auto import tqdm
 import logging
 import warnings
 
+# Auxiliary functions
+import auxiliary_functions
+
 log = logging.getLogger('altShap')
 
 class altShapExplainer:
@@ -31,7 +17,8 @@ class altShapExplainer:
     Uses the SHAP approach as implemented by Lundberg and Lee, but instead of calculating
     local feature value contributions, this method calculates global feature value
     contributions. Moreover, the feature value contributions are in terms of contribution
-    to a measure of accuracy of choice.
+    to a measure of accuracy of choice. In addition, the global feature importance measures
+    account for feature dependence.
 
     Parameters:
     ------------------------------------------------------------------------------------
@@ -70,13 +57,16 @@ class altShapExplainer:
         y : numpy.array
             vector of samples corresponding to the observed output, given the input matrix X
         
-        score_measure : str (default = 'accuracy_score')
+        score_measure : method (default = accuracy_score)
             method to use as measure for model accuracy
 
         Returns:
         ------------------------------------------------------------------------------------
         A M x 1 vector, corresponding to the estimated global feature importance values.
         '''
+        
+        # Instantiate
+        self.score_measure = score_measure
 
         # Standardise data
         if str(type(X)).endswith("pandas.core.series.Series'>"):
@@ -92,17 +82,29 @@ class altShapExplainer:
         assert len(X.shape) == 2, 'input data needs to be a matrix, i.e. at least two features'
 
         # Conditions on y
-        assert str(type(y)).endswith('numpy.array') or str(type(y)).endswith("series.Series'>"), 'response variable needs to be of numpy array or pandas.core.series.Series format'
+        assert (str(type(y)).endswith("numpy.ndarray'>") and (len(y.shape) == 1)) or str(type(y)).endswith("series.Series'>"), 'response variable needs to be of numpy array or pandas.core.series.Series format'
         assert len(y) == self.N, 'response vector needs to have same # of obs as feature matrix'
         self.ytrue = y
     
+        # Conditions on model function/ iml.Model
+        if self.score_measure == roc_auc_score:
+            assert len(self.model.f(self.data.data).shape) == 1, 'if "roc_auc_score" is chosen as score measure, then provided model needs to output probabilities. For most models, thus input model.predict_proba instead of model.predict'
+
         # Null model
-        self.fnull = self.model.f(self.data.data)
-        self.measure_null = accuracy_score(self.ytrue, self.fnull)
+        if self.score_measure != roc_auc_score:
+            self.fnull = self.model.f(self.data.data)
+            self.measure_null = self.score_measure(self.ytrue, self.fnull)
+        elif self.score_measure == roc_auc_score:
+            self.fnull = self.model.f(self.data.data)[:,1]
+            self.measure_null = self.score_measure(self.ytrue, self.fnull)
 
         # Full model
-        self.fX = self.model.f(X)
-        self.measure_fX = accuracy_score(self.ytrue, self.fX)
+        if self.score_measure != roc_auc_score:
+            self.fX = self.model.f(X)
+            self.measure_fX = self.score_measure(self.ytrue, self.fX)
+        elif self.score_measure == roc_auc_score:
+            self.fX = self.model.f(X)[:,1]
+            self.measure_fX = self.score_measure(self.ytrue, self.fX)
 
         # Explanations
         explanations = []
@@ -299,15 +301,18 @@ class altShapExplainer:
         num_to_run = self.N * (self.nsamplesAdded - self.nsamplesRun)
         data = self.synth_data[self.nsamplesRun*self.N : self.nsamplesAdded*self.N,:]
         
-        modelOut = self.model.f(data)
+        if self.score_measure != roc_auc_score:
+            modelOut = self.model.f(data)
+        elif self.score_measure == roc_auc_score:
+            modelOut = self.model.f(data)[:,1]
         if isinstance(modelOut, (pd.DataFrame, pd.Series)):
             modelOut = modelOut.values
         self.y[:self.nsamples*self.N] = np.reshape(modelOut,(num_to_run, 1))
 
         for i in range(1,self.nsamples):
             #print(measure[self.nsamplesRun].shape)
-            #print(accuracy_score(self.ytrue, self.y[self.nsamplesRun*self.N: i*self.N]))
-            self.measure[self.nsamplesRun] = accuracy_score(self.ytrue, self.y[self.nsamplesRun*self.N: i*self.N])
+            #print(self.score_measure(self.ytrue, self.y[self.nsamplesRun*self.N: i*self.N]))
+            self.measure[self.nsamplesRun] = self.score_measure(self.ytrue, self.y[self.nsamplesRun*self.N: i*self.N])
             self.nsamplesRun += 1
 
     def solve(self):
