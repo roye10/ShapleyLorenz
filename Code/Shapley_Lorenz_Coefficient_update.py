@@ -410,20 +410,20 @@ def powerset(iterable):
 
 # ---------------------------------
 # Tests
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
+# from sklearn.ensemble import RandomForestRegressor
+# from sklearn.linear_model import LinearRegression
 
-# Sim data
-# background data
-X_bg = np.random.normal(0,1,(100,16))
-betas = np.random.uniform(1,6,16)
-y_bg = np.dot(X_bg,betas)
+# # Sim data
+# # background data
+# X_bg = np.random.normal(0,1,(100,16))
+# betas = np.random.uniform(1,6,16)
+# y_bg = np.dot(X_bg,betas)
 
-# data to explain
-X = np.random.normal(0,1,(100,16))
+# # data to explain
+# X = np.random.normal(0,1,(100,16))
 
-model = LinearRegression()
-model.fit(X_bg,y_bg)
+# model = LinearRegression()
+# model.fit(X_bg,y_bg)
 
-lorenzshare = ShapleyLorenzShare(model.predict, X_bg, y_bg)
-lorenzshare.shapleyLorenz_val(X)
+# lorenzshare = ShapleyLorenzShare(model.predict, X_bg, y_bg)
+# lorenzshare.shapleyLorenz_val(X)
