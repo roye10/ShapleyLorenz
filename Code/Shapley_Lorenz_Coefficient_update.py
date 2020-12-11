@@ -415,12 +415,12 @@ def powerset(iterable):
 
 # # Sim data
 # # background data
-# X_bg = np.random.normal(0,1,(100,16))
+# X_bg = np.abs(np.random.normal(0,1,(100,16)))
 # betas = np.random.uniform(1,6,16)
 # y_bg = np.dot(X_bg,betas)
 
 # # data to explain
-# X = np.random.normal(0,1,(100,16))
+# X = np.abs(np.random.normal(0,1,(100,16)))
 
 # model = LinearRegression()
 # model.fit(X_bg,y_bg)
