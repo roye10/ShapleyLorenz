@@ -1,6 +1,6 @@
 # ShapleyLorenz
 
-# Recently added
+## Recently added
 - extension of Kernel SHAP as proposed by Lundberg and Lee in "A Unified Approach to Interpreting Model Predicions", whereby SHAP values are 'standardised' according to their contribution to model accuracy
 
 ### - IN PROGRESS - 
