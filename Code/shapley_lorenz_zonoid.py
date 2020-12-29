@@ -69,7 +69,7 @@ class ShapleyLorenzShare:
         assert(len(self.data.data.shape) == 2, 'Need to specify an appropriate number of features, p. p has to be > 1')
 
         # shuffle background dataset, for the case that it is the same as the one to be explained
-        self.data.data, y_bg = shuffle(self.data.data, y_bg)
+        self.data.data, self.y_bg = shuffle(self.data.data, self.y_bg)
 
 #   Combinatoric tool
     def powerset(self, iterable, max_full_subsetsize):
