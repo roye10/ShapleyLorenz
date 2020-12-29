@@ -10,6 +10,7 @@ pip install shapley_lz
 from shapley_lz import ShapleyLorenzShare
 
 # Compute Shapley Lorenz Zonoid values:
+# for fitted model "model" and given background and test data set
 lorenzshare = ShapleyLorenzShare(model.predict, X_background_data, y_background_data)
 lorenzshare.shapleyLorenz_val(X_test, y_test)
 ```
