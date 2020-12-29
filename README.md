@@ -20,7 +20,7 @@ Function takes in covariate matrix and response vector and outputs the Lorenz Zo
 TODO:
 - insert method for normalising features, so as to account for negative values
 
-# Example plots
+## Example plots
 
 Plot of Lorenz Curves for simulation data set with three features and normally distributed features and error term:
 
