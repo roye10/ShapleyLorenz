@@ -1,4 +1,4 @@
-![SLZ](Pictures/logo_small.png)
+![Logo](Pictures/logo_small.png)
 
 ## Installation
 this package can be installed from [PyPi](https://pypi.org/project/shapley-lz/) using the following command
@@ -12,9 +12,10 @@ pip install shapley_lz
 Algorithm that computes Shapley-Lorenz contribution coefficients, as defined in the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
 
 The function takes as input
-* the pre-trained model `f(·)`, which is to be explained,
-* a of the training covariance matrix `X_train` and
-* a covariance test set, `X_test`, whose output, `f(X_test)` is to be explained
+* the pre-trained model `f(·)`,
+* a sample of the training covariance matrix `X_train` and
+* a covariance test set, `X_test`, whose output, `f(X_test)`, is to be explained
+
 and returns an array of Lorenz Zonoid value for each feature, computed using the Shapley attribution mechanism, in order to account for interaction effects.
 
 ## Exmaple Using a Random Forest Classifier
