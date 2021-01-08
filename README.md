@@ -1,6 +1,6 @@
 # ShapleyLorenz
 
-!![SLZ](Pictures/logo.png)
+!![SLZ](Pictures/Logo.png)
 
 ## Installation
 this package can be installed from [PyPi](https://pypi.org/project/shapley-lz/) using the following command
