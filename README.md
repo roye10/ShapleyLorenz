@@ -1,11 +1,13 @@
 ![Logo](Pictures/logo_small.png)
 
 ## Installation
-this package can be installed from [PyPi](https://pypi.org/project/shapley-lz/) using the following command
+this package can be installed from [PyPI](https://pypi.org/project/shapley-lz/) using the following command
 
 ```
 pip install shapley_lz
 ```
+
+N.B. there is also a [multiprocessing version](Code/shapley_lz_multiproc), using Python's inbuilt multiprocessing module, thus making use of all cpu cores, allowing faster runtime.
 
 ## Summary
 
