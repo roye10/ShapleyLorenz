@@ -1,7 +1,7 @@
 # ShapleyLorenz
 
 ## Installation
-this package can be installed using the following command
+this package can be installed from [PyPi](https://pypi.org/project/shapley-lz/) using the following command
 
 ```
 pip install shapley_lz
@@ -9,12 +9,32 @@ pip install shapley_lz
 
 ## Summary
 
-Algorithm that computes Shapley-Lorenz contribution coefficients, inspired by the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
+Algorithm that computes Shapley-Lorenz contribution coefficients, as defined in the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
 
-Function takes in covariate matrix and response vector and outputs the Lorenz Zonoid shares of the specified features.
+The function takes as input
+* the pre-trained model `f(·)`, which is to be explained,
+* a of the training covariance matrix `X_train` and
+* a covariance test set, `X_test`, whose output, `f(X_test)` is to be explained
+and returns an array of Lorenz Zonoid value for each feature, computed using the Shapley attribution mechanism, in order to account for interaction effects.
 
-TODO:
-- insert method for normalising features, so as to account for negative values
+## Exmaple Using a Random Forest Classifier
+```Python
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier as rf_class
+from sklearn.datasets import make_classifaction as gen_data
+
+# Simple example w/o train-test splitting thus same covariance matrix used and only first 100 observations explained
+N = 1000 # number of observations
+p = 4 # number of features
+X, y = gen_data(n_samples = N, n_features = 4, n_informative = 4)
+model = rf_class()
+model.fit(X,y)
+slz = ShapleyLorenzShare(model.predict_proba, X, y)
+slz_values = slz.shapleyLorenz_val(X[:100,:], y[:100], class_prob = True, pred_out = 'predict_proba')
+
+# Plot
+slz.slz_plots(slz_values[0])
+```
 
 ## Example plots
 
