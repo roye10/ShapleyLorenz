@@ -36,7 +36,7 @@ slz_values = slz.shapleyLorenz_val(X[:100,:], y[:100], class_prob = True, pred_o
 slz.slz_plots(slz_values[0])
 ```
 
-## Example plots
+## Intuition
 
 Plot of Lorenz Curves for simulation data set with three features and normally distributed features and error term:
 
