@@ -11,7 +11,7 @@ N.B. there is also a [multiprocessing version](Code/shapley_lz_multiproc), using
 
 ## Summary
 
-Algorithm that computes Shapley-Lorenz contribution coefficients, as defined in the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
+The module computes Shapley-Lorenz contribution coefficients, as defined in the paper "Shapley-Lorenz decompositions in eXplainable Artificial Intelligence", by Paolo Giudici and Emanuela Raffinetti from February 2020.
 
 The function takes as input
 * the pre-trained model `f(·)`,
