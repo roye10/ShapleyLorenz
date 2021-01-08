@@ -1,5 +1,3 @@
-# ShapleyLorenz
-
 ![SLZ](Pictures/logo_small.png)
 
 ## Installation
