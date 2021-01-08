@@ -20,23 +20,58 @@ The function takes as input
 
 and returns an array of Lorenz Zonoid value for each feature, computed using the Shapley attribution mechanism, in order to account for interaction effects.
 
-## Exmaple Using a Random Forest Classifier
+## Exmaple Using a Random Forest Classifier With Simulated Data
 ```Python
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier as rf_class
 from sklearn.datasets import make_classifaction as gen_data
+import shapley_lz
 
 # Simple example w/o train-test splitting thus same covariance matrix used and only first 100 observations explained
+# Generate data
 N = 1000 # number of observations
 p = 4 # number of features
 X, y = gen_data(n_samples = N, n_features = 4, n_informative = 4)
+
+# Train model
 model = rf_class()
 model.fit(X,y)
+
+# Compute Shapley Lorenz Zonoid shares
 slz = ShapleyLorenzShare(model.predict_proba, X, y)
-slz_values = slz.shapleyLorenz_val(X[:100,:], y[:100], class_prob = True, pred_out = 'predict_proba')
+slz_values = slz.shapleyLorenz_val(X, y, class_prob = True, pred_out = 'predict_proba')
 
 # Plot
 slz.slz_plots(slz_values[0])
+```
+
+## Example Using Multiple Processors With XGBoost
+```Python
+from sklearn.datasets import fetch_california_housing as data
+import xgboost as xgb
+import shapley_lz
+
+# Get data
+X,y = data(return_X_y=True, as_frame=True)
+
+# Train model
+model = xgb.XGBRegressor()
+model.fit(X,y)
+
+# Compute Shapley Lorenz Zonoid shares
+slz = ShapleyLorenzShare(model.predict, X[:50], y[:50])
+slz = ShapleyLorenzShare(X, y)
+iterator = np.arange(X.shape[1])
+def slz_parallel_func(iterator):
+    pool = mp.Pool(4)
+    slz_fnc = partial(slz.shapleyLorenz_val, X = X, y = y)
+    result_list = pool.map(slz_fnc, iterator)
+    print(result_list)
+
+start = time()
+if __name__ == '__main__':
+    slz_parallel_func(iterator)
+print(f'Time elapsed: {time() - start}')
 ```
 
 ## Intuition
