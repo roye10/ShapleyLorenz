@@ -2,16 +2,6 @@
 #                             Shapley Lorenz Function
 # ------------------------------------------------------------------------------------------
 
-# Modules
-import random
-import itertools
-import warnings
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.special import binom, factorial
-from sklearn.utils import shuffle
-from tqdm import tqdm
-
 class ShapleyLorenzShare:
     '''
     Uses the Shapley approach to calculate Shapley Lorenz Zonoid marginal contributions
@@ -273,31 +263,7 @@ class ShapleyLorenzShare:
         
         #Loop over all covariates
         for k in tqdm(range(self.M)):
-            #Initialise variables within loop
-            V_base = np.zeros((self.N, self.M, self.full_subsetsizes)) # here and in the following only (M-1) permutations, because
-                                                            # base maximally has M-1 covariates
-            V_k = np.zeros((self.N, self.M, self.full_subsetsizes))
-            Lor_k = np.zeros((self.full_subsetsizes,1))
-            Lor_base = np.zeros((self.full_subsetsizes,1))
 
-            Lor_k0 = np.zeros((self.full_subsetsizes,1))
-            Lor_k1 = np.zeros((self.full_subsetsizes,1))
-            Lor_base0 = np.zeros((self.full_subsetsizes,1))
-            Lor_base1 = np.zeros((self.full_subsetsizes,1))
-
-            ranks = np.arange(self.N_test)
-
-            if class_prob == False or (class_prob == True and pred_out == 'predict'):
-                y_base = np.zeros((self.N_test, self.full_subsetsizes))
-                y_k = np.ones((self.N_test, self.full_subsetsizes))
-            elif class_prob == True and pred_out == 'predict_proba':
-                y_base = np.zeros((self.N_test, 2, self.full_subsetsizes))
-                y_b0 = np.zeros((self.N_test, self.full_subsetsizes))
-                y_b1 = np.zeros((self.N_test, self.full_subsetsizes))
-                y_k = np.zeros((self.N_test, 2, self.full_subsetsizes))
-                y_k0 = np.zeros((self.N_test, self.full_subsetsizes))
-                y_k1 = np.zeros((self.N_test, self.full_subsetsizes))
-            
             #Initialise indexes
             s_all = list(range(self.M))
             s_base = s_all.copy()
@@ -305,11 +271,11 @@ class ShapleyLorenzShare:
             k = [k, ]
 
             # Create dictionary of all subset sizes for which all permutations are considered
-            full_permts = {}
+            self.full_permts = {}
             for i,s in enumerate(self.powerset(s_base,len(s_base)+1)):
                 if len(s) in range(num_sub_sizes + 1) or len(s) in range(self.M-1-num_sub_sizes,self.M):
-                    full_permts[i] = s
-            full_permts = pd.DataFrame(list(full_permts.items()))
+                    self.full_permts[i] = s
+            self.full_permts = pd.DataFrame(list(self.full_permts.items()))
 
             # Create dictionary of all remaining subset permutations, after considering full subset permutations, given "n_iter"
             remaining_permts = {}
@@ -318,17 +284,42 @@ class ShapleyLorenzShare:
                     remaining_permts[i] = s
             remaining_permts = pd.DataFrame(list(remaining_permts.items()))
 
+            #Initialise variables within loop
+            V_base = np.zeros((self.N, self.M, len(self.full_permts))) # here and in the following only (M-1) permutations, because
+                                                            # base maximally has M-1 covariates
+            V_k = np.zeros((self.N, self.M, len(self.full_permts)))
+            Lor_k = np.zeros((len(self.full_permts),1))
+            Lor_base = np.zeros((len(self.full_permts),1))
+
+            Lor_k0 = np.zeros((len(self.full_permts),1))
+            Lor_k1 = np.zeros((len(self.full_permts),1))
+            Lor_base0 = np.zeros((len(self.full_permts),1))
+            Lor_base1 = np.zeros((len(self.full_permts),1))
+
+            ranks = np.arange(self.N_test)
+
+            if class_prob == False or (class_prob == True and pred_out == 'predict'):
+                y_base = np.zeros((self.N_test, len(self.full_permts)))
+                y_k = np.ones((self.N_test, len(self.full_permts)))
+            elif class_prob == True and pred_out == 'predict_proba':
+                y_base = np.zeros((self.N_test, 2, len(self.full_permts)))
+                y_b0 = np.zeros((self.N_test, len(self.full_permts)))
+                y_b1 = np.zeros((self.N_test, len(self.full_permts)))
+                y_k = np.zeros((self.N_test, 2, len(self.full_permts)))
+                y_k0 = np.zeros((self.N_test, len(self.full_permts)))
+                y_k1 = np.zeros((self.N_test, len(self.full_permts)))
+            
             # extract the corresponding kernel weight, from the full kernel weight set
-            kernel = np.zeros((self.full_subsetsizes,1))
+            kernel = np.zeros((len(self.full_permts),1))
             kernel_row = 0
             for i in range(len(self.kernel)):
-                if i in full_permts.iloc[:,0]:
+                if i in self.full_permts.iloc[:,0]:
                     kernel[kernel_row,0] = self.kernel[i,0]
                     kernel_row += 1
 
             #loop over all possible full permutations, given "n_iter"
             i = 0
-            for s in full_permts.iloc[:,1]:
+            for s in self.full_permts.iloc[:,1]:
                 #Initialise Kernel
                 s = list(s) # covariates in baseline (base model)
                 s_k = k+s # baseline covariates + kth covariate (model k)
@@ -443,46 +434,37 @@ class ShapleyLorenzShare:
 
 
                 elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
-                    Lor_k0[i,0] = (2/(self.N_test*self.y_mu))*np.cov(y_k0[:,i], ranks, bias = True)[0][1]
-                    Lor_k1[i,0] = (2/(self.N_test*self.y_mu))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
-                    Lor_base[i,0] = (2/(self.N_test*self.y_mu))*np.cov(y_base[:,i], ranks, bias = True)[0][1]
-
-                        
+                    Lor_k0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_k0[:,i], ranks, bias = True)[0][1]
+                    Lor_k1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
+                    Lor_base0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
+                    Lor_base1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
+                    
                 #Lor_val_pol = self.lz_polarisation(Lor_val_temp,self.M) # polarisation in case of negative values
                 i += 1
             #print(y_k)
             #print(y_base)
-            Lor_val = Lor_k - Lor_base
-
-            self.LZ[k,0] = np.dot(Lor_val.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
-
-                # elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
-                #     for j in range(self.N_test):
-                #         Lor_val_temp0[j,:] = j*(y_k0[j,:]-y_b0[j,:])
-                #         Lor_val_temp1[j,:] = j*(y_k1[j,:]-y_b1[j,:])
-                #     Lor_val_temp0_sum = np.sum(Lor_val_temp0,0)
-                #     Lor_val_temp1_sum = np.sum(Lor_val_temp1,0)
-                    
+            if class_prob == False or (class_prob == True and pred_out == 'predict'):
+                val_bool = 0
+                Lor_val = Lor_k - Lor_base
+                self.LZ[k,0] = np.dot(Lor_val.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
+            
+            elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
+                val_bool = 1
+                Lor_val0 = Lor_k0 - Lor_base0
+                Lor_val1 = Lor_k1 - Lor_base1
+                self.LZ0[k,0] = np.dot(Lor_val0.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
+                self.LZ1[k,0] = np.dot(Lor_val1.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
+           
                     #Lor_val0_pol = self.lz_polarisation(Lor_val_temp0,self.M)
                     #Lor_val1_pol = self.lz_polarisation(Lor_val_temp1,self.M)
-
-                    # Lor_val0 = ((2/(self.N_test**2))*self.y_class_mu[0])*Lor_val_temp0_sum
-                    # Lor_val1 = ((2/(self.N_test**2))*self.y_class_mu[1])*Lor_val_temp1_sum
-                    # Lor_val0 = Lor_val0.reshape((1,2**(self.M-1)))
-                    # Lor_val1 = Lor_val1.reshape((1,2**(self.M-1)))
-
-                    # self.LZ0[k,0] = np.dot(Lor_val0,kernel)
-                    # self.LZ1[k,0] = np.dot(Lor_val1,kernel)
 
         # if class_prob == False or (class_prob == True and pred_out == 'predict'):
         #    self.LZ_shares = np.column_stack((X.col_names,self.LZ))
         col_names = np.array(X.col_names).reshape((self.M,1))
-        return np.hstack((col_names, self.LZ))
-
-                # elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
-                #     self.LZ_shares = [np.column_stack((X.col_names,self.LZ0)), np.column_stack((X.col_names, self.LZ1))]
-                #     return np.column_stack((X.col_names,self.LZ0)), np.column_stack((X.col_names, self.LZ1));
-
+        if val_bool == 0:
+            return np.hstack((col_names, self.LZ))
+        elif val_bool == 1:
+            return np.hstack((col_names, self.LZ0)), np.hstack((col_names, self.LZ1));
 
 #Auxiliary functions
 
@@ -511,7 +493,7 @@ def standardise_data_format(value):
 class Model:
     def __init__(self, f):
         if str(type(f)).endswith('BinaryResultsWrapper'):
-            self.f.values = f
+            self.f = f.values
         else:
             self.f = f
 
