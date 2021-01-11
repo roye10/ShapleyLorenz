@@ -63,7 +63,7 @@ slz = ShapleyLorenzShare(model.predict, X[:50], y[:50])
 slz = ShapleyLorenzShare(X, y)
 iterator = np.arange(X.shape[1])
 def slz_parallel_func(iterator):
-    pool = mp.Pool(4)
+    pool = mp.Pool(mp.cpu_count())
     slz_fnc = partial(slz.shapleyLorenz_val, X = X, y = y)
     result_list = pool.map(slz_fnc, iterator)
     print(result_list)
