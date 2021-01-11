@@ -321,6 +321,12 @@ class ShapleyLorenzShare:
         V_k = np.zeros((self.N, self.M, len(self.full_permts)))
         Lor_k = np.zeros((len(self.full_permts),1))
         Lor_base = np.zeros((len(self.full_permts),1))
+
+        Lor_k0 = np.zeros((len(self.full_permts),1))
+        Lor_k1 = np.zeros((len(self.full_permts),1))
+        Lor_base0 = np.zeros((len(self.full_permts),1))
+        Lor_base1 = np.zeros((len(self.full_permts),1))
+
         ranks = np.arange(self.N_test)
 
         if class_prob == False or (class_prob == True and pred_out == 'predict'):
@@ -463,56 +469,39 @@ class ShapleyLorenzShare:
             if class_prob == False or (class_prob == True and pred_out == 'predict'):
                 Lor_k[i,0] = (2/(self.N_test*self.y_mu))*np.cov(y_k[:,i], ranks, bias = True)[0][1]
                 Lor_base[i,0] = (2/(self.N_test*self.y_mu))*np.cov(y_base[:,i], ranks, bias = True)[0][1]
+
+            elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
+                Lor_k0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_k0[:,i], ranks, bias = True)[0][1]
+                Lor_k1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
+                Lor_base0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_b0[:,i], ranks, bias = True)[0][1]
+                Lor_base1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_b1[:,i], ranks, bias = True)[0][1]
                     
-                
             # for j in range(self.N_test):
             #     Lor_val_temp[j,:] = j*(y_k[j,:]-y_base[j,:]) # for all feature combinations simultaneously
             # Lor_val_temp_sum = np.sum(Lor_val_temp,0)
             #Lor_val_pol = self.lz_polarisation(Lor_val_temp,self.M) # polarisation in case of negative values
             i += 1
-        #print(y_k)
-        #print(y_base)
-        Lor_val = Lor_k - Lor_base
-            # Lor_val = ((2/(self.N_test**2))*self.y_mu)*Lor_val_temp_sum
-            # Lor_val = Lor_val.reshape((1,2**(self.M-1)))
-
-        self.LZ[k,0] = np.dot(Lor_val.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
-
-            # elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
-            #     for j in range(self.N_test):
-            #         Lor_val_temp0[j,:] = j*(y_k0[j,:]-y_b0[j,:])
-            #         Lor_val_temp1[j,:] = j*(y_k1[j,:]-y_b1[j,:])
-            #     Lor_val_temp0_sum = np.sum(Lor_val_temp0,0)
-            #     Lor_val_temp1_sum = np.sum(Lor_val_temp1,0)
+        
+        if class_prob == False or (class_prob == True and pred_out == 'predict'):
+            val_bool = 0
+            Lor_val = Lor_k - Lor_base
+            self.LZ[k,0] = np.dot(Lor_val.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
+            
+        elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
+            val_bool = 1
+            Lor_val0 = Lor_k0 - Lor_base0
+            Lor_val1 = Lor_k1 - Lor_base1
+            self.LZ0[k,0] = np.dot(Lor_val0.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
+            self.LZ1[k,0] = np.dot(Lor_val1.T,kernel) # equation 19 on page 10 of Giudiuci and Raffinetti (Feb 2020) paper
                 
                 #Lor_val0_pol = self.lz_polarisation(Lor_val_temp0,self.M)
                 #Lor_val1_pol = self.lz_polarisation(Lor_val_temp1,self.M)
 
-                # Lor_val0 = ((2/(self.N_test**2))*self.y_class_mu[0])*Lor_val_temp0_sum
-                # Lor_val1 = ((2/(self.N_test**2))*self.y_class_mu[1])*Lor_val_temp1_sum
-                # Lor_val0 = Lor_val0.reshape((1,2**(self.M-1)))
-                # Lor_val1 = Lor_val1.reshape((1,2**(self.M-1)))
-
-                # self.LZ0[k,0] = np.dot(Lor_val0,kernel)
-                # self.LZ1[k,0] = np.dot(Lor_val1,kernel)
-
-        # if class_prob == False or (class_prob == True and pred_out == 'predict'):
-        #    self.LZ_shares = np.column_stack((X.col_names,self.LZ))
         col_names = np.array(X.col_names).reshape((self.M,1))
-        return np.hstack((col_names, self.LZ))
-
-                # elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
-                #     self.LZ_shares = [np.column_stack((X.col_names,self.LZ0)), np.column_stack((X.col_names, self.LZ1))]
-                #     return np.column_stack((X.col_names,self.LZ0)), np.column_stack((X.col_names, self.LZ1));
-
-    # def run(self, X, y):
-    #     processes = []
-
-    #     for k in tqdm(range(self.M)):
-    #         p = mp.Process(target = self.shapleyLorenz_val, args = (X, y, k))
-    #         processes.append(p)
-
-    #     [x.start() for x in processes]
+        if val_bool == 0:
+            return np.hstack((col_names, self.LZ))
+        elif val_bool == 1:
+            return np.hstack((col_names, self.LZ0)), np.hstack((col_names, self.LZ1));
 
 #Auxiliary functions
 
@@ -541,7 +530,7 @@ def standardise_data_format(value):
 class Model:
     def __init__(self, f):
         if str(type(f)).endswith('BinaryResultsWrapper'):
-            self.f.values = f
+            self.f = f.values
         else:
             self.f = f
 
