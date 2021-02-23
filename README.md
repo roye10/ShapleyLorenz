@@ -25,13 +25,13 @@ and returns an array of Lorenz Zonoid value for each feature, computed using the
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier as rf_class
 from sklearn.datasets import make_classifaction as gen_data
-import shapley_lz
+from shapley_lz import ShapleyLorenzShare
 
 # Simple example w/o train-test splitting thus same covariance matrix used and only first 100 observations explained
 # Generate data
 N = 1000 # number of observations
 p = 4 # number of features
-X, y = gen_data(n_samples = N, n_features = 4, n_informative = 4)
+X, y = gen_data(n_samples = N, n_features = 4, n_informative = 4, n_redundant = 0)
 
 # Train model
 model = rf_class()
@@ -45,11 +45,11 @@ slz_values = slz.shapleyLorenz_val(X, y, class_prob = True, pred_out = 'predict_
 slz.slz_plots(slz_values[0])
 ```
 
-## Example Using Multiple Processors With XGBoost
+## Example Using Multiple Processors With XGBoost on California Housing Data
 ```Python
+# NB.: please use the multiprocessing version code in the code folder. This has not yet been attached to the PyPi package.
 from sklearn.datasets import fetch_california_housing as data
 import xgboost as xgb
-import shapley_lz
 
 # Get data
 X,y = data(return_X_y=True, as_frame=True)
