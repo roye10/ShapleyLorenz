@@ -2,16 +2,17 @@
 # #                             Shapley Lorenz Function
 # # ------------------------------------------------------------------------------------------
 
-# # Modules
+# Modules
 
-# import random
-# import itertools
-# import warnings
-# import numpy as np
-# import matplotlib.pyplot as plt
-# from scipy.special import binom, factorial
-# from sklearn.utils import shuffle
-# from tqdm import tqdm
+import random
+import itertools
+import warnings
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.special import binom, factorial
+from sklearn.utils import shuffle
+from tqdm import tqdm
 
 class ShapleyLorenzShare:
     '''
