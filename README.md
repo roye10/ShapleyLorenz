@@ -8,7 +8,7 @@ pip install shapley_lz
 ```
 
 N.B.
-- there is also a [multiprocessing version](Code/shapley_lz_multiproc), using Python's inbuilt multiprocessing module, thus making use of all cpu cores, allowing faster runtime within the Code folder linked above.
+- there is also a [multiprocessing version](Code/shapley_lz_multiproc), using Python's inbuilt multiprocessing module, thus making use of all cpu cores, allowing faster runtime. The package is named shapley_lz_multiproc.py, linked above.
 - xgboost is not yet supported
 
 ## Summary
