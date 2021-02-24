@@ -44,6 +44,7 @@ slz_values = slz.shapleyLorenz_val(X, y, class_prob = True, pred_out = 'predict_
 # Plot
 slz.slz_plots(slz_values[0])
 ```
+![plot_firstExample](Pictures/first_example.png)
 
 ## Example Using Multiple Processors With XGBoost on California Housing Data
 ```Python
