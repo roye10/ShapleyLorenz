@@ -42,6 +42,7 @@ slz = ShapleyLorenzShare(model.predict_proba, X, y)
 slz_values = slz.shapleyLorenz_val(X, y, class_prob = True, pred_out = 'predict_proba')
 
 # Plot
+# (Bar chart automatically plots in increasing order of SLZ value)
 slz.slz_plots(slz_values[0])
 ```
 ![plot_firstExample](Pictures/first_example.png)
