@@ -47,22 +47,28 @@ slz.slz_plots(slz_values[0])
 ```
 ![plot_firstExample](Pictures/first_example.png)
 
-## Example Using Multiple Processors With XGBoost on California Housing Data
+## Example Using Multiple Processors With MLP on California Housing Data
 ```Python
 # N.B. please use the multiprocessing version code in the code folder. This has not yet been attached to the PyPi package.
 from sklearn.datasets import fetch_california_housing as data
 import xgboost as xgb
 
+# Modules
+from sklearn.datasets import fetch_california_housing as data
+from sklearn.neural_network import MLPRegressor as mlp
+import multiprocessing as mp
+from functools import partial
+from time import time
+
 # Get data
 X,y = data(return_X_y=True, as_frame=True)
 
 # Train model
-model = xgb.XGBRegressor()
+model = mlp()
 model.fit(X,y)
 
-# Compute Shapley Lorenz Zonoid shares
+# Multiprocessing setup
 slz = ShapleyLorenzShare(model.predict, X[:50], y[:50])
-slz = ShapleyLorenzShare(X, y)
 iterator = np.arange(X.shape[1])
 def slz_parallel_func(iterator):
     pool = mp.Pool(mp.cpu_count())
@@ -70,6 +76,7 @@ def slz_parallel_func(iterator):
     result_list = pool.map(slz_fnc, iterator)
     print(result_list)
 
+# Compute SLZ values
 start = time()
 if __name__ == '__main__':
     slz_parallel_func(iterator)
