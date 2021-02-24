@@ -7,7 +7,9 @@ this package can be installed from [PyPI](https://pypi.org/project/shapley-lz/) 
 pip install shapley_lz
 ```
 
-N.B. there is also a [multiprocessing version](Code/shapley_lz_multiproc), using Python's inbuilt multiprocessing module, thus making use of all cpu cores, allowing faster runtime within the Code folder linked above.
+N.B.
+- there is also a [multiprocessing version](Code/shapley_lz_multiproc), using Python's inbuilt multiprocessing module, thus making use of all cpu cores, allowing faster runtime within the Code folder linked above.
+- xgboost is not yet supported
 
 ## Summary
 
@@ -49,11 +51,7 @@ slz.slz_plots(slz_values[0])
 
 ## Example Using Multiple Processors With MLP on California Housing Data
 ```Python
-# N.B. please use the multiprocessing version code in the code folder. This has not yet been attached to the PyPi package.
-from sklearn.datasets import fetch_california_housing as data
-import xgboost as xgb
-
-# Modules
+# N.B. please use the multiprocessing version of the shapley_lz module in the code folder. This has not yet been deployed in the PyPi package.
 from sklearn.datasets import fetch_california_housing as data
 from sklearn.neural_network import MLPRegressor as mlp
 import multiprocessing as mp
