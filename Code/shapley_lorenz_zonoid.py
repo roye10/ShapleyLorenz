@@ -1,6 +1,15 @@
 # ------------------------------------------------------------------------------------------
 #                             Shapley Lorenz Function
 # ------------------------------------------------------------------------------------------
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.utils import shuffle
+from scipy.special import binom, factorial
+import itertools
+from tqdm import tqdm
+import warnings
+
 
 class ShapleyLorenzShare:
     '''
@@ -28,9 +37,10 @@ class ShapleyLorenzShare:
             warnings.warn('A background dataset larger than 50, may cause prohibitive long runtime. Consider using a sample of maximally 100 observations.')
             user_input = str(input("Enter 's' to sample 50 observations and enter 'c', to continue with current background dataset"))
             if user_input == 's':
-                idx = np.random.randint(self.N,50)
+                idx = np.random.randint(0,self.N,50)
                 self.data.data = self.data.data[idx,:]
                 self.data = standardise_data_format(self.data.data)
+                self.N = self.data.data.shape[0]
                 if len(self.y_bg.shape) == 1:
                     try:
                         self.y_bg = self.y_bg.iloc[idx]
@@ -436,13 +446,12 @@ class ShapleyLorenzShare:
                 elif class_prob == True and (pred_out == 'predict_proba' or pred_out == 'predict_log_proba'):
                     Lor_k0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_k0[:,i], ranks, bias = True)[0][1]
                     Lor_k1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
-                    Lor_base0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
-                    Lor_base1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_k1[:,i], ranks, bias = True)[0][1]
+                    Lor_base0[i,0] = (2/(self.N_test*self.y_class_mu[0]))*np.cov(y_b0[:,i], ranks, bias = True)[0][1]
+                    Lor_base1[i,0] = (2/(self.N_test*self.y_class_mu[1]))*np.cov(y_b1[:,i], ranks, bias = True)[0][1]
                     
                 #Lor_val_pol = self.lz_polarisation(Lor_val_temp,self.M) # polarisation in case of negative values
                 i += 1
-            #print(y_k)
-            #print(y_base)
+            
             if class_prob == False or (class_prob == True and pred_out == 'predict'):
                 val_bool = 0
                 Lor_val = Lor_k - Lor_base
