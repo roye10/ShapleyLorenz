@@ -27,7 +27,7 @@ and returns an array of Lorenz Zonoid value for each feature, computed using the
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier as rf_class
 from sklearn.datasets import make_classifaction as gen_data
-from shapley_lz import ShapleyLorenzShare
+from shapley_lz.explainer.shapley_lz import ShapleyLorenzShare as slShare
 
 # Simple example w/o train-test splitting thus same covariance matrix used and only first 100 observations explained
 # Generate data
@@ -40,7 +40,7 @@ model = rf_class()
 model.fit(X,y)
 
 # Compute Shapley Lorenz Zonoid shares
-slz = ShapleyLorenzShare(model.predict_proba, X, y)
+slz = slShare(model.predict_proba, X, y)
 slz_values = slz.shapleyLorenz_val(X, y, class_prob = True, pred_out = 'predict_proba')
 
 # Plot
@@ -57,6 +57,7 @@ from sklearn.neural_network import MLPRegressor as mlp
 import multiprocessing as mp
 from functools import partial
 from time import time
+from shapley_lz.explainer.shapley_lz_multiproc import ShapleyLorenzShare as slShare_multiproc
 
 # Get data
 X,y = data(return_X_y=True, as_frame=True)
@@ -66,7 +67,7 @@ model = mlp()
 model.fit(X,y)
 
 # Multiprocessing setup
-slz = ShapleyLorenzShare(model.predict, X[:50], y[:50])
+slz = slShare_multiproc(model.predict, X[:50], y[:50])
 iterator = np.arange(X.shape[1])
 def slz_parallel_func(iterator):
     pool = mp.Pool(mp.cpu_count())
