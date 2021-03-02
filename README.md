@@ -57,7 +57,7 @@ from sklearn.neural_network import MLPRegressor as mlp
 import multiprocessing as mp
 from functools import partial
 from time import time
-from shapley_lz.explainer.shapley_lz_multiproc import ShapleyLorenzShare as slShare_multiproc
+from shapley_lz.variants.shapley_lz_multiproc import ShapleyLorenzShare as slShare_multiproc
 
 # Get data
 X,y = data(return_X_y=True, as_frame=True)
